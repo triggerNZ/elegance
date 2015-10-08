@@ -29,12 +29,12 @@ object Checker {
   case object NA extends Result
   case object Ok extends Result
   case class UnfixableRuleFailure(rule: Rule, astNode: RichNode, errorPositions: Seq[Position]) extends Result
-  case class FixableRuleFailure(rule: Rule, astNode: RichNode) extends Result
+  case class FixableRuleFailure(rule: Rule, astNode: RichNode, errorPositions: Seq[Position]) extends Result
 
   implicit class ResultMethods(result: Result) {
     def isFailure = result match {
       case UnfixableRuleFailure(_, _, _) => true
-      case FixableRuleFailure(_, _) => true
+      case FixableRuleFailure(_, _, _) => true
       case _ => false
     }
   }

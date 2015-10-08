@@ -2,6 +2,7 @@ package com.pavlinic.elegance
 
 import scalariform.parser.CompilationUnit
 import Node._
+import scalaz._, Scalaz._
 
 object Rules {
   def fileLength(len: Int) = new Rule {
@@ -15,7 +16,7 @@ object Rules {
 
     def checker: NodeChecker = {
       case RichNode(CompilationUnit(_, _), CodeFile(_, raw)) =>
-        if (raw.lines.length < len) Seq() else Seq(Position(0, 1))
+        if (raw.lines.length < len) Seq() else Seq(Position(0, raw))
     }
 
     def fixer: NodeFixer = ???
@@ -34,9 +35,26 @@ object Rules {
         val lines = raw.lines.toSeq
         lines.filter(_.length > len).map {line =>
           // bug here for dup lines
-          Position(raw.indexOf(line), lines.indexOf(line))
+          Position(raw.indexOf(line), raw)
         }
       }
+    }
+
+    def fixer: NodeFixer = ???
+  }
+
+  val noTabs = new Rule {
+    def name: String = "no-tabs"
+    def message: String = s"Tabs are not allowed"
+
+    def matcher: NodeMatcher = {
+      case RichNode(CompilationUnit(_, _), _) => true
+    }
+
+
+    def checker: NodeChecker = {
+      case RichNode(CompilationUnit(_, _), CodeFile(_, raw)) =>
+        raw.zipWithIndex.filter(_._1 === '\t').map { case (tab, pos) => Position(pos, raw) }
     }
 
     def fixer: NodeFixer = ???

@@ -61,7 +61,7 @@ object IOChecker {
   def errorMessages(r: Result): Seq[String] = {
     r match {
       case UnfixableRuleFailure(r, n, positions) => positions.map(pos => s"${n.file}:${pos.lineNumber}: Unfixable: ${r.message} ")
-      case FixableRuleFailure  (r, n) => Seq(s"${n.file}:${n.lineNumber}: Fixable :  ${r.message}} ")
+      case FixableRuleFailure  (r, n, positions) => positions.map(pos => s"${n.file}:${pos.lineNumber}: Fixable :  ${r.message} ")
       case _                          => Seq()
     }
   }

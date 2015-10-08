@@ -15,4 +15,4 @@ trait Rule {
   def fixer: NodeFixer
 
 }
-case class Position(rawPos: Int, lineNumber: Int)
+
