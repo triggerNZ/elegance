@@ -10,4 +10,4 @@ libraryDependencies += "com.lihaoyi" %% "ammonite-ops" % "0.4.8"
 
 libraryDependencies += "com.twitter" %% "util-eval" % "6.27.0"
 
-libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value
+libraryDependencies += "org.specs2" %% "specs2-core" % "3.6.4" % "test"

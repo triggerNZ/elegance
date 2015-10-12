@@ -19,7 +19,7 @@ object Rules {
         if (raw.lines.length < len) Seq() else Seq(Position(0, raw))
     }
 
-    def fixer: NodeFixer = ???
+    def fixer: NodeFixer = Map.empty
   }
 
   def lineLength(len: Int) = new Rule {
@@ -40,10 +40,10 @@ object Rules {
       }
     }
 
-    def fixer: NodeFixer = ???
+    def fixer: NodeFixer = Map.empty
   }
 
-  val noTabs = new Rule {
+  def noTabs(spacesPerTab : Int = 2) = new Rule {
     def name: String = "no-tabs"
     def message: String = s"Tabs are not allowed"
 
@@ -57,7 +57,12 @@ object Rules {
         raw.zipWithIndex.filter(_._1 === '\t').map { case (tab, pos) => Position(pos, raw) }
     }
 
-    def fixer: NodeFixer = ???
+    def fixer: NodeFixer = { case (node, positions) =>
+      positions.foldLeft(node) { (n, pos) =>
+        //get should be safe here because tab to space replacement does not affect compiationallPositions
+        n.replaceStringAt(pos.rawPos, 1, " " * spacesPerTab).get
+      }
+    }
   }
 
 

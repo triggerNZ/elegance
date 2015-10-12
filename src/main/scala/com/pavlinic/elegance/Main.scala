@@ -1,6 +1,7 @@
 package com.pavlinic.elegance
 
 import ammonite.ops._
+import com.pavlinic.elegance.Node.RichNode
 
 import com.twitter.util.Eval
 
@@ -14,6 +15,7 @@ import parser._
 
 import IOUtils._
 import Checker._
+import util._
 
 object Main extends SafeApp {
   import ConfigParser._
@@ -28,7 +30,7 @@ object Main extends SafeApp {
       val res = for {
         config <- parseConfig(configFile)
         files   = scalaFiles(wd)
-        _      <- doCheck(files)(config)
+        _      <- doCheck(files)(config.rules)
       } yield ()
       res.except(die(_))
     } else die(s"$configFile is required")
@@ -40,11 +42,10 @@ object FileFinder {
 }
 
 object IOChecker {
-  def doCheck(files: List[Path])(implicit config: EleganceConfig): IO[Unit] = {
+  import Parser._
+  def doCheck(files: List[Path])(implicit rules: Seq[Rule]): IO[Unit] = {
     val seq: List[IO[Unit]] = files.map { f=>
-      implicit val codeFile = CodeFile(f, read! f)
-      val astOpt = ScalaParser.parse(codeFile.rawText, ScalaVersions.Scala_2_11.toString)
-
+      val astOpt = parseFile(f)
       astOpt.fold(die("If it doesn't parse, you have bigger problems than style")) { ast =>
         IO {
           val result = check(ast).filter(_.isFailure)
@@ -60,11 +61,15 @@ object IOChecker {
 
   def errorMessages(r: Result): Seq[String] = {
     r match {
-      case UnfixableRuleFailure(r, n, positions) => positions.map(pos => s"${n.file}:${pos.lineNumber}: Unfixable: ${r.message} ")
-      case FixableRuleFailure  (r, n, positions) => positions.map(pos => s"${n.file}:${pos.lineNumber}: Fixable :  ${r.message} ")
+      case UnfixableRuleFailure(r, n, positions) => positions.map(pos => s"${n.file}:${pos.lineNumber}: Unfixable: ${r.message} ".red)
+      case FixableRuleFailure  (r, n, positions) => positions.map(pos => s"${n.file}:${pos.lineNumber}: Fixable :  ${r.message} ".yellow)
       case _                          => Seq()
     }
   }
+}
+
+object Parser {
+  def parseFile(f: Path): Option[RichNode] = CodeFile(f, read! f).parse
 }
 
 object ConfigParser {

@@ -10,6 +10,10 @@ trait EleganceConfig {
   def defaultRules: List[Rule] = List(
     fileLength(100),
     lineLength(80),
-    noTabs
+    noTabs(2)
   )
+}
+
+object DefaultConfig extends EleganceConfig {
+  def rules = defaultRules
 }

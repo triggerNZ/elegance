@@ -6,8 +6,8 @@ import scalariform._
 import scalariform.parser.AstNode
 
 object Checker {
-  def check(ast: RichNode)(implicit config: EleganceConfig) = {
-    config.rules.map { rule =>
+  def check(ast: RichNode)(implicit rules: Seq[Rule]) = {
+    rules.map { rule =>
       checkRule(rule, ast)
     }
   }

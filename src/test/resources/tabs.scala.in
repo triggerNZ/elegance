@@ -1,0 +1,3 @@
+object TabDemo {
+	def str = "A"
+}
