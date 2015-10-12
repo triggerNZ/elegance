@@ -21,8 +21,8 @@ trait EleganceConfig {
   def rules: List[Rule]
 
   def defaultRules: List[Rule] = List(
-    fileLength(100),
-    lineLength(80),
+    fileLength(150),
+    lineLength(120),
     noTabs(2)
   )
 }

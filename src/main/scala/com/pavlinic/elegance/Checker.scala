@@ -30,7 +30,8 @@ object Checker {
      if (nextRule.matcher.isDefinedAt(curAst) && nextRule.checker.isDefinedAt(curAst)) {
       val positions = nextRule.checker(ast)
       if (nextRule.fixer.isDefinedAt(curAst, positions)) {
-        nextRule.fixer((curAst, positions)).get //crashing here is a concious decision, because it indicates the rule is broken
+        //crashing here is a concious decision, because it indicates the rule is broken
+        nextRule.fixer((curAst, positions)).get
       } else ast
      } else ast
 
