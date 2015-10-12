@@ -58,12 +58,33 @@ object Rules {
     }
 
     def fixer: NodeFixer = { case (node, positions) =>
-      positions.foldLeft(node) { (n, pos) =>
+      Some(positions.foldLeft(node) { (n, pos) =>
         //get should be safe here because tab to space replacement does not affect compiationallPositions
         n.replaceStringAt(pos.rawPos, 1, " " * spacesPerTab).get
-      }
+      })
     }
   }
 
+  def headerMatches(header: String) = new Rule {
+    def name: String = "header-matches"
+    def message: String = s"Incorrect header"
 
+    def matcher: NodeMatcher = {
+      case RichNode(CompilationUnit(_, _), _) => true
+    }
+
+    def checker: NodeChecker = {
+      case RichNode(CompilationUnit(_, _), CodeFile(_, raw)) => {
+        if (raw.startsWith(header)) {
+          Seq()
+        } else {
+          Seq(Position(0, raw))
+        }
+      }
+    }
+
+    def fixer: NodeFixer = { case (node, positions) =>
+      node.replaceStringAt(0, 0, header)
+    }
+  }
 }

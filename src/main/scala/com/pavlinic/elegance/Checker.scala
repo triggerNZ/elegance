@@ -18,6 +18,8 @@ object Checker {
       val errorPositions = rule.checker(astNode)
       if (errorPositions.isEmpty) {
         Ok
+      } else if (rule.fixer.isDefinedAt((astNode, errorPositions))){
+        FixableRuleFailure(rule, astNode, errorPositions)
       } else {
         UnfixableRuleFailure(rule, astNode, errorPositions)
       }
