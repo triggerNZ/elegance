@@ -18,22 +18,39 @@ import Checker._
 import util._
 
 object Main extends SafeApp {
+
+
+
   import ConfigParser._
   import FileFinder._
   import IOChecker._
+
+  case class CliInput(fix: Boolean = false)
+
+  def parseCli(args: List[String]): Option[CliInput] = {
+    val parser = new scopt.OptionParser[CliInput]("elegance") {
+      head("elegance", "0.1")
+      opt[Unit]('f', "fix") action { (x, c) =>
+        c.copy(fix = true)
+      }
+    }
+    parser.parse(args, CliInput())
+  }
 
   override def runl(args: List[String]): IO[Unit] = {
     val wd = cwd
     val configFile = cwd / "elegance.config"
 
-    if (exists(configFile)) {
-      val res = for {
-        config <- parseConfig(configFile)
-        files   = scalaFiles(wd)
-        _      <- doCheck(files)(config.rules)
-      } yield ()
-      res.except(die(_))
-    } else die(s"$configFile is required")
+    parseCli(args).fold(die("Could not parse command line args")) { cliInput =>
+      if (exists(configFile)) {
+        val res = for {
+          config <- parseConfig(configFile)
+          files = scalaFiles(wd)
+          _ <- doCheck(files, cliInput.fix)(config.rules)
+        } yield ()
+        res.except(die(_))
+      } else die(s"$configFile is required")
+    }
   }
 }
 
@@ -43,30 +60,42 @@ object FileFinder {
 
 object IOChecker {
   import Parser._
-  def doCheck(files: List[Path])(implicit rules: Seq[Rule]): IO[Unit] = {
+  def doCheck(files: List[Path], fix: Boolean)(implicit rules: Seq[Rule]): IO[Unit] = {
     val seq: List[IO[Unit]] = files.map { f=>
       val astOpt = parseFile(f)
       astOpt.fold(die("If it doesn't parse, you have bigger problems than style")) { ast =>
+        val result = check(ast).filter(_.isFailure)
         IO {
-          val result = check(ast).filter(_.isFailure)
-          result.flatMap { r =>
-            errorMessages(r)
+          result.flatMap { res =>
+            errorMessages(res, fix)
           }.foreach(println)
-
+        } >> IO {
+          if (fix) {
+            write(f, fixNode(ast).codeFile.rawText)
+          }
         }
       }
     }
     implicitly[Monad[IO]].sequence(seq) >> IO(())
   }
 
-  def errorMessages(r: Result): Seq[String] = {
+  def errorMessages(r: Result, doFix: Boolean): Seq[String] = {
     r match {
-      case UnfixableRuleFailure(r, n, positions) => positions.map(pos => s"${n.file}:${pos.lineNumber}: Unfixable: ${r.message} ".red)
-      case FixableRuleFailure  (r, n, positions) => positions.map(pos => s"${n.file}:${pos.lineNumber}: Fixable :  ${r.message} ".yellow)
-      case _                          => Seq()
+      case UnfixableRuleFailure(r, n, positions) => positions.map { pos =>
+        s"${n.file}:${pos.lineNumber}: Unfixable: ${r.message} ".red
+      }
+      case FixableRuleFailure  (r, n, positions) => positions.map { pos =>
+        if (doFix) {
+          s"${n.file}:${pos.lineNumber}: Fixing :  ${r.message} ".green
+        } else {
+          s"${n.file}:${pos.lineNumber}: Fixable :  ${r.message} ".yellow
+        }
+      }
+      case _ => Seq()
     }
   }
 }
+
 
 object Parser {
   def parseFile(f: Path): Option[RichNode] = CodeFile(f, read! f).parse

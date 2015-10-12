@@ -11,6 +11,19 @@ object Checker {
       checkRule(rule, ast)
     }
   }
+
+  def fixNode(ast: RichNode)(implicit rules: Seq[Rule]): RichNode = {
+    rules.foldLeft(ast) { (curAst, nextRule) =>
+     if (nextRule.matcher.isDefinedAt(curAst) && nextRule.checker.isDefinedAt(curAst)) {
+      val positions = nextRule.checker(ast)
+      if (nextRule.fixer.isDefinedAt(curAst, positions)) {
+        nextRule.fixer((curAst, positions)).get //crashing here is a concious decision, because it indicates the rule is broken
+      } else ast
+     } else ast
+
+    }
+  }
+
   def checkRule(rule: Rule, astNode: RichNode) : Result = {
     if (!rule.matcher.isDefinedAt(astNode) || !rule.matcher(astNode)) {
       NA
