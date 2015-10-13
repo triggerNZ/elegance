@@ -13,11 +13,12 @@
 //   limitations under the License.
 package com.pavlinic.elegance
 
-import scalariform.parser.AstNode
 import scalaz._, Scalaz._
 
+import scala.meta._
+
 object Node {
-  case class RichNode(n: AstNode, codeFile: CodeFile) {
+  case class RichNode(n: Source, codeFile: CodeFile) {
     def file = codeFile.path.toString
 
     def replaceStringAt(position: Int, originalLength: Int, newText: String): Option[RichNode] = {
@@ -31,7 +32,7 @@ object Node {
   }
 
 
-  implicit def toRichNode(n: AstNode)(implicit codeFile: CodeFile) = {
+  implicit def toRichNode(n: Source)(implicit codeFile: CodeFile) = {
     RichNode(n, codeFile)
   }
 }

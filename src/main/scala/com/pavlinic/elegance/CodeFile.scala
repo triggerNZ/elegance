@@ -13,14 +13,20 @@
 //   limitations under the License.
 package com.pavlinic.elegance
 
+import java.io._
+
 import ammonite.ops.Path
 import com.pavlinic.elegance.Node.RichNode
 
-import scalariform.ScalaVersions
-import scalariform.parser.ScalaParser
+import scala.meta._
+import scala.meta.syntactic.parsers._
+import org.scalameta.convert._
+import scala.meta.Origin.{String => OString, _}
 
 case class CodeFile(path: Path, rawText: String) {
   def parse: Option[RichNode] = {
-    ScalaParser.parse(this.rawText, ScalaVersions.Scala_2_11.toString).map( n => RichNode(n, this))
+    val txtSource: Origin = implicitly[Convert[String, Origin]].apply(rawText)
+    val parseTree = txtSource.parse(implicitly[Parse[Source]])
+    Some(RichNode(parseTree, this))
   }
 }

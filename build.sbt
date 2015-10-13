@@ -1,7 +1,7 @@
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-  "org.scalariform" %% "scalariform" % "0.1.7",
+  "org.scalameta" %% "scalameta" % "0.1.0-M0",
   "org.scalaz" %% "scalaz-core" % "7.1.4",
   "org.scalaz" %% "scalaz-effect" % "7.1.4",
   "com.lihaoyi" %% "ammonite-ops" % "0.4.8",

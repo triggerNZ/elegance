@@ -13,9 +13,10 @@
 //   limitations under the License.
 package com.pavlinic.elegance
 
-import scalariform.parser.CompilationUnit
 import Node._
 import scalaz._, Scalaz._
+
+import scala.meta._
 
 object Rules {
   def fileLength(len: Int) = new Rule {
@@ -23,12 +24,12 @@ object Rules {
     def message: String = s"File length exceeds $len lines"
 
     def matcher: NodeMatcher = {
-      case RichNode(CompilationUnit(_, _), _) => true
+      case RichNode(s : Source, _) => true
     }
 
 
     def checker: NodeChecker = {
-      case RichNode(CompilationUnit(_, _), CodeFile(_, raw)) =>
+      case RichNode(s: Source, CodeFile(_, raw)) =>
         if (raw.lines.length < len) Seq() else Seq(Position(0, raw))
     }
 
@@ -40,11 +41,11 @@ object Rules {
     def message: String = s"Line length exceeds $len characters"
 
     def matcher: NodeMatcher = {
-      case RichNode(CompilationUnit(_, _), _) => true
+      case RichNode(s: Source, _) => true
     }
 
     def checker: NodeChecker = {
-      case RichNode(CompilationUnit(_, _), CodeFile(_, raw)) => {
+      case RichNode(s: Source, CodeFile(_, raw)) => {
         val lines = raw.lines.toSeq
         lines.filter(_.length > len).map {line =>
           // bug here for dup lines
@@ -61,12 +62,12 @@ object Rules {
     def message: String = s"Tabs are not allowed"
 
     def matcher: NodeMatcher = {
-      case RichNode(CompilationUnit(_, _), _) => true
+      case RichNode(s: Source, _) => true
     }
 
 
     def checker: NodeChecker = {
-      case RichNode(CompilationUnit(_, _), CodeFile(_, raw)) => {
+      case RichNode(s: Source, CodeFile(_, raw)) => {
         raw.zipWithIndex.filter(_._1 === '\t').map { case (tab, pos) => Position(pos, raw) }
       }
     }
@@ -86,11 +87,11 @@ object Rules {
     def message: String = s"Incorrect header"
 
     def matcher: NodeMatcher = {
-      case RichNode(CompilationUnit(_, _), _) => true
+      case RichNode(s: Source, _) => true
     }
 
     def checker: NodeChecker = {
-      case RichNode(CompilationUnit(_, _), CodeFile(_, raw)) => {
+      case RichNode(s: Source, CodeFile(_, raw)) => {
         if (raw.startsWith(header)) {
           Seq()
         } else {

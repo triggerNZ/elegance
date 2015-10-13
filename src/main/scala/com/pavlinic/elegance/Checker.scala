@@ -15,8 +15,6 @@ package com.pavlinic.elegance
 
 import com.pavlinic.elegance.Node.RichNode
 
-import scalariform._
-import scalariform.parser.AstNode
 
 object Checker {
   def check(ast: RichNode)(implicit rules: Seq[Rule]) = {

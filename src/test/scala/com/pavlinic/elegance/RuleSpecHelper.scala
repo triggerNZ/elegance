@@ -52,8 +52,6 @@ trait RuleSpecHelper {
     }
 
 
-    println(s"Rule ${rule.name} is broken at $positions")
-
     val fixed = if (rule.fixer.isDefinedAt((ast, positions))) {
       println("Applying fixer for rule" + rule.name)
       rule.fixer((ast, positions)).getOrElse(throw new RuntimeException("Could not parse fixed tree"))
