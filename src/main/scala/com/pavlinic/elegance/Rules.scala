@@ -66,15 +66,18 @@ object Rules {
 
 
     def checker: NodeChecker = {
-      case RichNode(CompilationUnit(_, _), CodeFile(_, raw)) =>
+      case RichNode(CompilationUnit(_, _), CodeFile(_, raw)) => {
         raw.zipWithIndex.filter(_._1 === '\t').map { case (tab, pos) => Position(pos, raw) }
+      }
     }
 
-    def fixer: NodeFixer = { case (node, positions) =>
-      Some(positions.foldLeft(node) { (n, pos) =>
-        //get should be safe here because tab to space replacement does not affect compiationallPositions
-        n.replaceStringAt(pos.rawPos, 1, " " * spacesPerTab).get
-      })
+    def fixer: NodeFixer = {
+      case (node, positions) => {
+        Some(positions.foldLeft(node) { (n, pos) =>
+          //get should be safe here because tab to space replacement does not affect compiationallPositions
+          n.replaceStringAt(pos.rawPos, 1, " " * spacesPerTab).get
+        })
+      }
     }
   }
 

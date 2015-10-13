@@ -13,7 +13,7 @@
 //   limitations under the License.
 package com.pavlinic.elegance
 
-import com.pavlinic.elegance.Checker.UnfixableRuleFailure
+import com.pavlinic.elegance.Checker.{FixableRuleFailure, UnfixableRuleFailure}
 import com.pavlinic.elegance.Node.RichNode
 import org.specs2.Specification
 
@@ -47,8 +47,12 @@ trait RuleSpecHelper {
   private def process(ast:RichNode)(rule: Rule): (RichNode, Seq[Position]) = {
     val positions = Checker.checkRule(rule, ast) match {
       case UnfixableRuleFailure(rule, node, positions) => positions
+      case FixableRuleFailure(rule, node, positions)   => positions
       case _                                           => Seq()
     }
+
+
+    println(s"Rule ${rule.name} is broken at $positions")
 
     val fixed = if (rule.fixer.isDefinedAt((ast, positions))) {
       println("Applying fixer for rule" + rule.name)
