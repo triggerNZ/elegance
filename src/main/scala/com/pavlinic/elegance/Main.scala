@@ -23,9 +23,6 @@ import scalaz._
 import Scalaz._
 import effect._
 
-import scalariform._
-import parser._
-
 import IOUtils._
 import Checker._
 import util._

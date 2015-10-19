@@ -19,14 +19,12 @@ import ammonite.ops.Path
 import com.pavlinic.elegance.Node.RichNode
 
 import scala.meta._
-import scala.meta.syntactic.parsers._
-import org.scalameta.convert._
-import scala.meta.Origin.{String => OString, _}
+
 
 case class CodeFile(path: Path, rawText: String) {
   def parse: Option[RichNode] = {
-    val txtSource: Origin = implicitly[Convert[String, Origin]].apply(rawText)
-    val parseTree = txtSource.parse(implicitly[Parse[Source]])
+    val parseTree = rawText.parse[Source]
     Some(RichNode(parseTree, this))
   }
 }
+

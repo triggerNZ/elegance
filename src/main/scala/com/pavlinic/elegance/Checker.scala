@@ -18,8 +18,8 @@ import com.pavlinic.elegance.Node.RichNode
 
 object Checker {
   def check(ast: RichNode)(implicit rules: Seq[Rule]) = {
-    rules.map { rule =>
-      checkRule(rule, ast)
+    rules.flatMap { rule =>
+      ast.preorder.map(n => checkRule(rule, n))
     }
   }
 

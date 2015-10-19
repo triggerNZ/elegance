@@ -13,12 +13,10 @@
 //   limitations under the License.
 package com.pavlinic.elegance
 
-import scalaz._, Scalaz._
-
 import scala.meta._
 
 object Node {
-  case class RichNode(n: Source, codeFile: CodeFile) {
+  case class RichNode(n: Tree, codeFile: CodeFile) {
     def file = codeFile.path.toString
 
     def replaceStringAt(position: Int, originalLength: Int, newText: String): Option[RichNode] = {
@@ -29,6 +27,8 @@ object Node {
       builder.insert(position, newText)
       codeFile.copy(rawText = builder.mkString).parse
     }
+    def preorder: Seq[RichNode] = this +: children.flatMap(_.preorder)
+    def children: Seq[RichNode] = n.children.map(tree => RichNode(tree, codeFile))
   }
 
 
