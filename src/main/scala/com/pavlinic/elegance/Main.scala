@@ -80,7 +80,7 @@ object IOChecker {
             errorMessages(res, fix)
           }.foreach(println)
         } >> IO {
-          if (fix) {
+          if (!result.isEmpty && fix) {
             write.over(f, fixNode(ast).codeFile.rawText)
           }
         }
